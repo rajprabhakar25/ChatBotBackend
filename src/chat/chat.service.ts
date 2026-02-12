@@ -21,8 +21,22 @@ export class ChatService {
       ],
     };
 
-    const response = await axios.post(url, payload);
+    try {
+      const response = await axios.post(url, payload);
 
-    return response.data.candidates[0].content.parts[0].text;
+      if (!response.data.candidates?.length) {
+        return '⚠️ AI did not return a response. Try again.';
+      }
+
+      return response.data.candidates[0].content.parts[0].text;
+    } catch (error: any) {
+      console.error('Gemini Error:', error.response?.data || error.message);
+
+      if (error.response?.status === 429) {
+        return '⚠️ Rate limit exceeded. Please wait.';
+      }
+
+      return '⚠️ Server error. Please try again later.';
+    }
   }
 }
